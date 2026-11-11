@@ -38,7 +38,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
   - Done when: pnpm workspace installs; exact versions pinned; `pnpm -r typecheck` and `pnpm -r test` run (even if empty); generated dirs are git-ignored.
   - Verify: `pnpm install --frozen-lockfile && pnpm -r typecheck && pnpm -r test`
 
-- [ ] **P0.2 · CI skeleton** (S)
+- [x] **P0.2 · CI skeleton** (S)
   - Needs: P0.1 · Refs: D§9
   - Files: `.github/workflows/ci.yml`
   - Done when: CI runs install, typecheck, unit tests; a secret scanner step runs; job fails on any error.
