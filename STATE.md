@@ -1,25 +1,29 @@
 # STATE
-Updated: 2026-11-10 23:55 · Lead: Claude Code
+Updated: 2026-11-11 08:10 · Lead: Claude Code
 Approved phase: P0 (approved by Josh 2026-11-10)
 
 ## Current task
-P0.3 · Books metadata · done on branch `p0.3-books-metadata`, draft PR open, not merged. Awaiting Josh's review before P0.4.
+None in progress. P0.3 · Books metadata · done and merged (PR #2 → `main` as `fcbc20a`). Awaiting Josh's approval to start P0.4.
 
 ## Progress
-- P0.1, P0.2 merged to `main`. The `p0.2-ci-skeleton` branch was deleted locally and on origin.
-- P0.3: `packages/core/data/books.json` (+ `books.SOURCE.md` provenance), `packages/core/src/books.ts`, `books.test.ts`; `src/index.ts` re-exports books.
-- Checks run locally: frozen install OK; `pnpm -r typecheck` OK; `pnpm -r test` OK (core 60/60, scripts 12/12). Mutation checks: swapping two chapter counts fails the fingerprint even though totals still pass; a colliding alias fails at module load.
-- Uncommitted files: none after the P0.3 commit.
+- P0.1, P0.2, P0.3 merged to `main`. CI on `main` after the P0.3 merge (run 42983874534) is green.
+- Branch `p0.3-books-metadata` still exists locally and on origin (merged); delete when Josh says.
+- Uncommitted files: none.
 - Failing checks: none.
 
 ## Needs decision
-- Review P0.3 / its draft PR and decide on merge. Josh asked that P0.4 not start until review.
+- Approve `P0.4 · Verse IDs and types` and settle its open points (proposed defaults in parentheses):
+  a. `decodeVerseId` on invalid input (throw; plus `isVerseId` for yes/no checks)
+  b. branded `VerseId` type (yes; log the deviation from D§3.1's `number`)
+  c. `Translation = 'bsb' | 'kjv' | 'web' | 'esv'` in `types.ts` (yes; DESIGN never defines it)
+  d. DESIGN says `packages/core/types.ts`, PLAN says `src/types.ts` (use `src/types.ts`)
+  e. `test-vectors/verse-ids.json` for the Swift port (optional; not in P0.4's Files)
 
 ## Blockers
 - None.
 
 ## Next
-- After merge, sync `main`, branch, and start `P0.4 · Verse IDs and types` (Refs: D§3.1 Verse ID, D§3.2).
+- On approval, branch from `main` and start `P0.4 · Verse IDs and types` (Refs: D§3.1 Verse ID, D§3.2).
 
 ## Notes for next session
 - pnpm is not installed globally on this machine, and corepack 0.33 can't run pnpm 12 (native binary layout). Use `npx --yes pnpm@12.16.1 <cmd>` or install pnpm 12.16.1.
