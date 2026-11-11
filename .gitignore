@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Generated output — never committed (AGENTS.md, D§2)
+dist/
+apps/web/public/data/
+.astro/
+coverage/
+.wrangler/
+
+# Local env and secrets (ESV key lives only as a Worker secret)
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+
+# OS / editor
+.DS_Store
+*.log

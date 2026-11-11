@@ -32,7 +32,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
 
 ## P0 · Foundations
 
-- [ ] **P0.1 · Workspace scaffold** (S)
+- [x] **P0.1 · Workspace scaffold** (S)
   - Needs: none · Refs: D§2 (layout, tech)
   - Files: root `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `.gitignore`, `.editorconfig`, empty `apps/*`, `packages/*`, `scripts/`, `test-vectors/`
   - Done when: pnpm workspace installs; exact versions pinned; `pnpm -r typecheck` and `pnpm -r test` run (even if empty); generated dirs are git-ignored.
