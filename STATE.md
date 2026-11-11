@@ -1,25 +1,25 @@
 # STATE
-Updated: 2026-11-10 23:30 · Lead: Claude Code
+Updated: 2026-11-10 23:40 · Lead: Claude Code
 Approved phase: P0 (approved by Josh 2026-11-10)
 
 ## Current task
-P0.2 · CI skeleton · done (draft PR #1 green, not merged; awaiting Josh's review before P0.3)
+None in progress. P0.2 · CI skeleton · done and merged (PR #1 → `main` as `c59e317`). Awaiting Josh's approval to start P0.3.
 
 ## Progress
-- P0.1 done (`d00703f`, on `origin/main`).
-- P0.2 done on branch `p0.2-ci-skeleton`: `.github/workflows/ci.yml` (`9db105f`). Draft PR https://github.com/joshvasquezr/tolle/pull/1 is not merged.
-- CI run 42979723029 on `9db105f` passed every step: install, typecheck, tests (12/12), gitleaks checksum OK, self-test detected the canary, history scan found no leaks across 3 commits.
-- Uncommitted files: none (after this PLAN/STATE commit).
+- P0.1 done (`d00703f`). P0.2 done (`9db105f`, `d6357b6`), merged via PR #1.
+- CI on `main` after the merge (run 42980756079 on `c59e317`) is green.
+- Local `main` was fast-forwarded to `origin/main`. Feature branch `p0.2-ci-skeleton` still exists locally and on origin; delete it when Josh says.
+- Uncommitted files: none.
 - Failing checks: none.
 
 ## Needs decision
-- Review P0.2 / PR #1 and decide when to merge it. Josh asked that P0.3 not start until review.
+- Approve starting `P0.3 · Books metadata`.
 
 ## Blockers
 - None.
 
 ## Next
-- After review (and merge of PR #1 if Josh wants), start `P0.3 · Books metadata` from an up-to-date `main`.
+- On approval, branch from up-to-date `main` and start `P0.3 · Books metadata` (Refs: D§3.1 Books; SPEC §5.3).
 
 ## Notes for next session
 - pnpm is not installed globally on this machine, and corepack 0.33 can't run pnpm 12 (native binary layout). Use `npx --yes pnpm@12.16.1 <cmd>` or install pnpm 12.16.1.
