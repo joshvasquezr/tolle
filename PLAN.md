@@ -44,7 +44,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
   - Done when: CI runs install, typecheck, unit tests; a secret scanner step runs; job fails on any error.
   - Verify: open a draft PR; CI is green.
 
-- [ ] **P0.3 · Books metadata** (M)
+- [x] **P0.3 · Books metadata** (M)
   - Needs: P0.1 · Refs: D§3.1 Books; SPEC §5.3 parser rules
   - Files: `packages/core/src/books.ts`, `packages/core/data/books.json`, tests
   - Done when: 66 books with slug, name, testament, order, chapters, verse counts per chapter, aliases (SBL, Chicago, informal, spelled/Roman ordinals). Totals: 1,189 chapters, 31,102 verses.
@@ -453,7 +453,10 @@ P3 and P4 can run in parallel after P2. P5.0 (human email to Crossway) should st
 ## Decisions log
 Record outcomes of spikes and any deviations here (date · task · decision · reason).
 
-- _empty_
+- 2026-11-10 · P0.3 · Verse counts come from eBible.org `eng-kjv2006` USFM (zip SHA-256 `dce1ec3e…6cfd1c`; full record in `packages/core/data/books.SOURCE.md`). P0.9 should commit the same edition. · Josh approved; counts derived from a source instead of typed by hand, checked chapter by chapter.
+- 2026-11-10 · P0.3 · `BookId` is a branded `string` validated against `books.json` (`toBookId`/`isBookId`) instead of D§3.1's 66-member literal union. · Josh asked to avoid listing the 66 ids by hand when a clean type-safe option exists. `books.json` stays the single source; an unvalidated string still can't be passed as a `BookId`.
+- 2026-11-10 · P0.3 · Exact aliases must map to exactly one book (enforced when the module loads and in tests). Intentional ambiguity ("ph", "ju") comes only from prefix matching in P0.5. · Josh approved.
+- 2026-11-10 · P0.3 · `id` = `slug` for every book; `short` included (D§3.1) although PLAN's list omits it. · Josh approved; DESIGN takes precedence over PLAN.
 
 ## Open items needing Josh
 1. Product name and domain (`SPEC.md` §14 Q1) before P1.1 sets the wordmark.
