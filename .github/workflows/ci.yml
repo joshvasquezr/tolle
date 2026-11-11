@@ -1,0 +1,75 @@
+# PLAN P0.2 · D§9. Any failing step fails the job (bash -eo pipefail).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PNPM_VERSION: 12.16.1
+  GITLEAKS_VERSION: 8.30.1
+  GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # Third-party actions are pinned to commit SHAs, not tags.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # full history for the secret scan
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Install pnpm
+        run: npm install --global "pnpm@${PNPM_VERSION}"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Unit tests
+        run: pnpm -r test
+
+      - name: Install gitleaks
+        run: |
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSLo "$RUNNER_TEMP/$tarball" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$tarball"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$tarball" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$tarball" -C "$RUNNER_TEMP" gitleaks
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      # Proves the scanner can fail the job: a freshly generated fake token
+      # must be detected. Generated at runtime so it never enters history.
+      - name: Secret scanner self-test
+        run: |
+          canary="$RUNNER_TEMP/canary"
+          mkdir -p "$canary"
+          echo "token = ghp_$(openssl rand -hex 18)" > "$canary/leak.txt"
+          if gitleaks dir "$canary" --redact --no-banner --exit-code 1; then
+            echo "::error::gitleaks did not detect the canary token"
+            exit 1
+          fi
+
+      # SPEC §7 / D§8: secrets never committed. Redacted output only.
+      - name: Secret scan (full git history)
+        run: gitleaks git . --redact --no-banner --verbose --exit-code 1
