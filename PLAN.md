@@ -1,7 +1,7 @@
 # Implementation Plan: A Quiet Bible MVP
 
 Requirements: `SPEC.md` · Design: `DESIGN.md` (section numbers below are from it, written `D§3.4`). Requirement IDs (R1, N3, …) are from `SPEC.md`.
-No code exists yet. This plan only orders the work.
+This plan orders the work. Current progress is in `STATE.md`.
 
 ## How to use this plan
 This is a summary. `AGENTS.md` is the authority on workflow (approvals, scope, verification, git, coordination). If the two ever differ, follow `AGENTS.md`.
@@ -26,7 +26,7 @@ Task format: `ID · Title` — Needs · Refs · Files · Done when · Verify. Si
 | P6 Accounts + sync | Magic link, sync, delete | A1–A8 pass |
 | P7 Polish + launch | A11y, perf, beta, release | Success gates in `SPEC.md` §7 and §11 |
 
-Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP line arrives sooner. ESV and P7 still gate public launch; P6 may slip (SPEC §10).
+Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP line arrives sooner. The MVP line is an internal checkpoint with public-domain translations only (no ESV); it is not the launch scope. P7 gates public launch. ESV ships at launch only if its licensing, compliance, testing and attribution requirements are met (P5). Otherwise launch goes ahead with BSB, KJV and WEB, and ESV is not publicly accessible through the UI or API until they are met. P6 may slip (SPEC §10).
 
 ---
 
@@ -93,7 +93,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
   - Verify: fixture tests for John 3, Psalm 23, Genesis 1, one KJV `\nd` verse.
 
 - [ ] **P0.11 · Data validators** (M)
-  - Needs: P0.10 · Refs: D§6.2 validators; SPEC R11 risk
+  - Needs: P0.10 · Refs: D§6.2 validators; SPEC §12, risk 11
   - Files: `scripts/validate.ts`, tests with crafted bad inputs
   - Done when: build fails on missing books, wrong chapter/verse counts (unless in `versemap`), empty verses, stray markers, non-NFC text. Any real mismatch in BSB/KJV/WEB is fixed by a `versemap` entry or a recorded source fix.
   - Verify: `pnpm build:data` exits 0 for all three translations.
@@ -346,7 +346,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
 - [ ] **P5.8 · Compliance CI checks** (S)
   - Needs: P5.7 · Refs: D§8, D§9 "Compliance checks"
   - Files: `scripts/compliance.ts`, CI step
-  - Done when: CI fails if the ESV key value appears in `dist/`, if ESV text appears in `dist/`/SW config/sync types/sitemap, or if ad, donation or third-party script patterns are found.
+  - Done when: CI fails if the ESV key value appears in `dist/`, or if ESV text appears in `dist/`/SW config/sync types/sitemap. The general ad, donation and third-party script checks are built in P7.3 and are not repeated here.
   - Verify: add a deliberately bad file in a test branch; CI fails.
 
 ---
@@ -406,7 +406,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
 ## P7 · Polish and launch
 
 - [ ] **P7.1 · Accessibility pass** (M)
-  - Needs: P5.8, P6.8 (or P4 if P6 slips) · Refs: SPEC §6.10; D§5.4
+  - Needs: P6.8 (or P4 if P6 slips); also P5.8 if ESV ships at launch · Refs: SPEC §6.10; D§5.4
   - Files: fixes across components, `docs/a11y-checklist.md`
   - Done when: axe clean on all key pages and open popovers; 200% zoom and 320 px reflow verified; manual VoiceOver and keyboard-only pass recorded.
   - Verify: CI axe job plus checklist signed by Josh.
@@ -414,19 +414,19 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
 - [ ] **P7.2 · Performance pass** (M)
   - Needs: P7.1 · Refs: SPEC §7 targets; D§12 budget
   - Files: budget configs, optimizations
-  - Done when: Lighthouse CI ≥ 95 (perf, a11y, SEO); first-load JS ≤ 60 KB gz; CLS ≤ 0.02; ESV hit/miss times meet targets.
+  - Done when: Lighthouse CI ≥ 95 (perf, a11y, SEO); first-load JS ≤ 60 KB gz; CLS ≤ 0.02; ESV hit/miss times meet targets if ESV ships at launch.
   - Verify: CI budgets green on the production build.
 
 - [ ] **P7.3 · Security and privacy review** (S)
-  - Needs: P6.8 · Refs: D§8; SPEC §7 Privacy
-  - Files: CSP/headers config, `docs/runbook.md`
-  - Done when: headers and CSP in place and tested; logging contains no IP/query/email/token; runbook covers ESV key rotation, kill switch, restore.
-  - Verify: header test in CI; log-redaction test.
+  - Needs: P6.8 (or P4 if P6 slips) · Refs: D§8, D§9 "Compliance checks"; SPEC §7 Privacy
+  - Files: CSP/headers config, `docs/runbook.md`, `scripts/compliance.ts` and its CI step (general checks; P5.8 adds the ESV-specific checks if ESV ships)
+  - Done when: headers and CSP in place and tested; logging contains no IP/query/email/token; CI fails if ad, donation or third-party script patterns are found, on every build and whether or not ESV ships; runbook covers ESV key rotation (if ESV ships), kill switch, restore.
+  - Verify: header test in CI; log-redaction test; a deliberately bad file in a test branch fails the compliance CI step.
 
 - [ ] **P7.4 · Analytics (cookieless) and metrics** (S)
   - Needs: P7.3 · Refs: D§3.12 Metrics; SPEC §11
   - Files: metrics beacon, dashboard notes
-  - Done when: allow-listed counters only; no identifiers; Web Analytics enabled without cookies.
+  - Done when: allow-listed counters only; no identifiers; no cookies.
   - Verify: network capture shows no cookies or IDs.
 
 - [ ] **P7.5 · Private beta** (human)
@@ -437,7 +437,7 @@ Note: `SPEC.md` §10 puts ESV before highlights. This plan swaps them so the MVP
 - [ ] **P7.6 · Launch checklist** (S)
   - Needs: P7.5 · Refs: SPEC §8, §12 risks 1–3
   - Files: `docs/launch.md`
-  - Done when: ESV compliance doc complete with Crossway reply; no monetization anywhere (CI check green); production deploy done; rollback tested.
+  - Done when: if ESV ships at launch, ESV compliance doc complete with Crossway reply; otherwise ESV is not publicly accessible through the UI or API in the production build; the P7.3 no-monetization and third-party-script CI checks are green; production deploy done; rollback tested.
   - Verify: checklist fully ticked.
 
 ---
@@ -448,7 +448,7 @@ P0 ─► P1 ─► P2 ─► P3 ─► P4 ═► MVP line
  │                         └─► P5 ESV ─┐
  └─ P0.12 spike ─► P1.8 ─► P6 sync ────┴─► P7 launch
 ```
-P3 and P4 can run in parallel after P2. P5.0 (human email to Crossway) should start on day one.
+P3 and P4 can run in parallel after P2. P5.0 (human email to Crossway) should start on day one. P5 gates P7 only if ESV ships at launch (SPEC §14 Q12).
 
 ## Decisions log
 Record outcomes of spikes and any deviations here (date · task · decision · reason).
@@ -457,6 +457,10 @@ Record outcomes of spikes and any deviations here (date · task · decision · r
 - 2026-11-10 · P0.3 · `BookId` is a branded `string` validated against `books.json` (`toBookId`/`isBookId`) instead of D§3.1's 66-member literal union. · Josh asked to avoid listing the 66 ids by hand when a clean type-safe option exists. `books.json` stays the single source; an unvalidated string still can't be passed as a `BookId`.
 - 2026-11-10 · P0.3 · Exact aliases must map to exactly one book (enforced when the module loads and in tests). Intentional ambiguity ("ph", "ju") comes only from prefix matching in P0.5. · Josh approved.
 - 2026-11-10 · P0.3 · `id` = `slug` for every book; `short` included (D§3.1) although PLAN's list omits it. · Josh approved; DESIGN takes precedence over PLAN.
+- 2026-11-17 · docs refinement · ESV ships at public launch only if its licensing, compliance, testing and attribution requirements are met. Otherwise launch goes ahead with BSB, KJV and WEB, and ESV is not publicly accessible through the UI or API until they are met (mechanism not yet decided). Settles SPEC §14 Q12; updates SPEC §1, T1, §10 M4 and PLAN P7.1, P7.2, P7.6. No ESV constraint in SPEC §8.1, D§1 D5–D6, D§3.12 or AGENTS.md changes. · Josh decided.
+- 2026-11-17 · docs refinement · The general no-monetization and third-party-script CI checks are mandatory for every public launch and are built in P7.3, not P5.8; P5.8 keeps the ESV-specific checks. P7.3 no longer waits on P6.8 when P6 slips. · Josh decided.
+- 2026-11-17 · docs refinement · Reference bar focus uses / only; Cmd/Ctrl+L stays with the browser (SPEC §6.7, §6.9; D§3.6, D§12). · Josh approved; SPEC §6.9 already says shortcuts never override browser shortcuts.
+- 2026-11-17 · docs refinement · SPEC §14 Q17: repository is public on GitHub; license undecided. · Josh approved.
 
 ## Open items needing Josh
 1. Product name and domain (`SPEC.md` §14 Q1) before P1.1 sets the wordmark.

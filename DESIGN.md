@@ -1,6 +1,6 @@
 # Design: A Quiet Bible (working title) — MVP
 
-Source requirements: `/Users/joshv/repos/tolle/SPEC.md` (approved). Requirement IDs (R1, N3, P2, S5, H4, T5, A3, …) refer to that file.
+Source requirements: `SPEC.md`. Requirement IDs (R1, N3, P2, S5, H4, T5, A3, …) refer to that file.
 Assumptions are marked **[A]**. Items to prove early are marked **[SPIKE]** and are scheduled in M0.
 Open questions in SPEC section 14 are resolved here with the defaults stated there.
 
@@ -100,7 +100,8 @@ Generated output (`apps/web/public/data`, `dist`) is git-ignored. Exact dependen
 
 **Books** (`books.ts`, generated from `books.json`)
 ```ts
-type BookId = 'genesis' | /* … 66 … */ 'revelation'
+declare const bookIdBrand: unique symbol
+type BookId = string & { readonly [bookIdBrand]: true }   // branded string; ids live only in books.json. Get one from toBookId, isBookId or a Book
 interface Book {
   id: BookId; slug: string            // 'song-of-solomon'
   name: string; short: string         // 'Song of Solomon', 'Song'
@@ -241,7 +242,7 @@ One `keydown` listener on `document`. A key is ignored when: `event.isComposing`
 
 | Key | Handler |
 |---|---|
-| `/`, `Cmd/Ctrl+L` | `refbar.focus()` (`preventDefault` only for `/`; `Cmd+L` is left to the browser address bar if the page does not capture it **[A]**: bind it, because the SPEC asks for it, and accept the override) |
+| `/` | `refbar.focus()` with `preventDefault`. `Cmd/Ctrl+L` is not bound and stays with the browser address bar |
 | `B` | open picker |
 | `←` / `→` | previous / next chapter, only when there is no text selection and focus is on `body` or the article |
 | `T`, `D`, `?`, `Esc` | translation switcher, theme toggle, shortcut list, close/clear |
@@ -410,7 +411,7 @@ POST /api/v1/highlights/batch  { items:[{ verseId, color|null, updatedAt }] }   
 - `reset: true` is returned when `since` is older than the tombstone horizon; the client then performs a full pull and keeps only local rows newer than the server's version of each verse.
 - Responses carry `Cache-Control: no-store`.
 
-**Metrics (optional)**: `POST /api/v1/metrics { name, bucket }` writes to Workers Analytics Engine with no user or IP fields; names are an allow-list (`lookup_ms`, `parse_fail`, `search_used`, `highlight_used`). **[A]** Core Web Vitals come from Cloudflare Web Analytics (cookieless).
+**Metrics (optional)**: `POST /api/v1/metrics { name, bucket }` writes to Workers Analytics Engine with no user or IP fields; names are an allow-list (`lookup_ms`, `parse_fail`, `search_used`, `highlight_used`).
 
 ### 3.13 Service worker (`sw.ts`)
 - Precaches the versioned JS/CSS/fonts of the current build.
@@ -609,7 +610,7 @@ Logging: Worker logs only `{ requestId, route, status, durationMs }`. Query stri
 ## 8. Security and privacy controls
 
 - **ESV key:** Worker secret (`wrangler secret put ESV_API_KEY`). Never in `wrangler.jsonc`, client code, or build env. CI step fails the build if the key value appears in `dist/` (the key is provided to CI only for this check) and runs a secret scanner on every push. Rotation steps are documented in `docs/runbook.md`.
-- **CSP:** `default-src 'self'; script-src 'self' 'sha256-<theme-script>'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`. No third-party origins (Cloudflare Web Analytics is the one exception and is added to `script-src`/`connect-src` explicitly if enabled).
+- **CSP:** `default-src 'self'; script-src 'self' 'sha256-<theme-script>'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`. No third-party origins.
 - **Headers:** HSTS, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, `Permissions-Policy` empty for camera/mic/geo, `Cross-Origin-Opener-Policy: same-origin`.
 - **Input handling:** all Worker inputs validated against `books.json` and an allow-list; SQL uses bound parameters only; HTML is produced only by `renderChapter()` with escaping.
 - **Data minimization:** the account holds email, id, highlights. Reading position, settings, and translation stay local (SPEC section 7). No analytics identifiers; no cookies for anonymous visitors (the session cookie exists only after sign-in).
@@ -678,7 +679,7 @@ The copy handler listens to `copy` events inside `<article>`, builds clean text 
 | ESV option names and window semantics | Read live API docs and terms; email Crossway for written confirmation (SPEC open question 13) | Written answer on caching, half-book, indexing; limits encoded in config |
 | PD source quality | Parse BSB/KJV/WEB USFM with the validators | Zero validator errors or a documented `versemap` entry for each |
 | Selection → verse mapping across browsers | Prototype with 3 browsers incl. Safari | Range-to-verse mapping matches in all; otherwise verse-number path is primary |
-| `Cmd/Ctrl+L` capture | Test in Chrome, Safari, Firefox | Works or documented; `/` is the primary shortcut |
+| Reference-bar focus key | Test `/` in Chrome, Safari, Firefox; confirm `Cmd/Ctrl+L` is not intercepted | `/` focuses the bar; the browser address bar shortcut is unaffected |
 | First-load JS budget | Measure router + refbar + parser + books metadata | ≤ 60 KB gz; otherwise lazy-load the picker data and aliases not needed for first paint |
 
 ---
@@ -687,4 +688,4 @@ The copy handler listens to `copy` events inside `<article>`, builds clean text 
 Notes, bookmarks, plans, audio, social/sharing, AI, NIV, parallel view, multi-range references, partial-verse highlights, and monetization of any kind. See SPEC sections 2 and 13.
 
 ## 14. Next step
-After approval of this design, the next artifact is `tasks.md`: an ordered implementation plan following milestones M0–M7 (SPEC 10), each task tagged with the requirement IDs it satisfies.
+The ordered implementation plan is `PLAN.md`. The current task and approvals are in `STATE.md`.

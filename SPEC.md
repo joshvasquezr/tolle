@@ -13,7 +13,7 @@ Convention: items marked **[A]** are assumptions. Decisions still needed are in 
 
 **Opportunity.** Design is the product. If looking up a verse is instant and reading is a pleasure, people will choose it over the incumbents. The text is free (public domain) or free for non-commercial use (ESV), so the site can be small and have no commercial pressure.
 
-**MVP definition.** Desktop web. Four translations (BSB, KJV, WEB, ESV). Title picker + reference bar navigation. Full-text search. Local highlights, with optional sign-in to sync. No notes, bookmarks, plans, audio, sharing or AI.
+**MVP definition.** Desktop web. Three public-domain translations at launch (BSB, KJV, WEB), plus ESV once its licensing, compliance, testing and attribution requirements are met (section 8.1). Title picker + reference bar navigation. Full-text search. Local highlights, with optional sign-in to sync. No notes, bookmarks, plans, audio, sharing or AI.
 
 ---
 
@@ -178,7 +178,7 @@ Tints are low-saturation. Text contrast against each must stay at or above 4.5:1
 
 | ID | Requirement | Pri | Acceptance criteria |
 |---|---|---|---|
-| T1 | Launch translations: BSB (default), KJV, WEB, ESV | M | All four readable for all 66 books. |
+| T1 | Launch translations: BSB (default), KJV, WEB. ESV when its requirements in section 8.1 are met | M | BSB, KJV and WEB readable for all 66 books. ESV readable for all 66 books once offered. Until then ESV is not publicly accessible through the UI or the API. |
 | T2 | Translation switcher | M | A small control beside the reference bar shows the abbreviation (e.g. `BSB ▾`). Switching keeps the same chapter and scroll position at the same verse. |
 | T3 | Translation in the URL | M | `/bsb/john/3/16`. Shared links preserve the translation. |
 | T4 | Public-domain text served as static files | M | No backend call. Per-chapter JSON (or HTML) files from the CDN. |
@@ -263,7 +263,7 @@ Values are starting points **[A]**. All text pairs must meet WCAG AA (4.5:1 body
 6. Keyboard path: `Cmd/Ctrl+K`? No — open with `B` **[A]**, type "rom", Enter, type "8", Enter.
 
 ### 6.7 Flow: Reference bar
-1. User presses `/` (or `Cmd/Ctrl+L`). Bar grows, text selected.
+1. User presses `/`. Bar grows, text selected.
 2. User types `1 cor 13:4-7`. A faint suggestion shows "1 Corinthians 13:4–7".
 3. Enter. Page loads 1 Corinthians 13, verses 4–7 marked and scrolled to the center of the screen. URL updates to `/bsb/1-corinthians/13/4-7`.
 4. If the text is not a reference (e.g. "grace"), Enter opens search results for "grace".
@@ -276,7 +276,7 @@ See 5.5. Visual specifics: toolbar is 36px tall, rounded 8px, border 1px, soft s
 
 | Key | Action |
 |---|---|
-| `/` or `Cmd/Ctrl+L` | Focus reference bar |
+| `/` | Focus reference bar (`Cmd/Ctrl+L` stays with the browser address bar) |
 | `B` | Open book/chapter picker |
 | `←` / `→` | Previous / next chapter (when focus is not in an input) |
 | `J` / `K` | Scroll down / up by a screen **[A]** (Could) |
@@ -337,7 +337,7 @@ Book slugs: lowercase, hyphenated, full name (`1-corinthians`, `song-of-solomon`
 Last 2 versions of Chrome, Edge, Safari, Firefox (desktop). Phase 2 adds iOS Safari 16+ and Chrome Android. No IE. Works with JavaScript disabled for reading public-domain chapters (progressive enhancement); highlighting, search and the picker need JS.
 
 ### Privacy
-- No analytics cookies, no third-party trackers, no ad tech, no fingerprinting. Cookieless, privacy-friendly aggregate analytics only (e.g. self-hosted Plausible/Umami or Cloudflare Web Analytics) **[A]**, with no cross-site identifiers. This means no cookie banner is needed.
+- No analytics cookies, no third-party trackers, no ad tech, no fingerprinting. Cookieless, privacy-friendly aggregate analytics only (e.g. self-hosted Plausible/Umami) **[A]**, with no cross-site identifiers. This means no cookie banner is needed.
 - Accounts store only: email (hashed for lookup + encrypted for sending, or plain in the auth provider), user ID, highlight records, timestamps. No names, no reading history, no device fingerprints.
 - Reading position and settings stay on the device (not synced) in MVP **[A]**.
 - ESV proxy does not log user IPs or queries beyond short-lived rate-limit counters. Passage requests are not tied to accounts.
@@ -357,7 +357,7 @@ Last 2 versions of Chrome, Edge, Safari, Firefox (desktop). Phase 2 adds iOS Saf
 ## 8. Licensing and compliance
 
 ### 8.1 ESV (via api.esv.org)
-Source of truth: the ESV API terms and Crossway's permissions. The requirements below follow the terms as supplied in the brief. **Engineering and legal must re-read the live terms before launch [A].**
+Source of truth: the ESV API terms and Crossway's permissions. The requirements below follow the terms as supplied in the brief. **Engineering and legal must re-read the live terms before ESV is made publicly available [A].**
 
 | Rule | Requirement in this product |
 |---|---|
@@ -492,7 +492,7 @@ Suggested sequencing (milestones, not dates; **[A]** assumes one builder part-ti
 2. **M1 Read** — static reading view, URLs, SEO, prev/next, theme, settings.
 3. **M2 Navigate** — picker, reference bar, shortcuts, translation switcher.
 4. **M3 Search** — in-browser index and results page.
-5. **M4 ESV** — proxy, limits, attribution, fallback behaviors. *Do this before public launch; confirm terms with Crossway.*
+5. **M4 ESV** — proxy, limits, attribution, fallback behaviors. *Aim to finish before public launch and confirm terms with Crossway. ESV is offered only once its licensing, compliance, testing and attribution requirements are met. If they are not met by launch, ESV follows launch and does not delay a BSB, KJV and WEB launch.*
 6. **M5 Highlights (local)** — palette, toolbar, keyboard, undo, export.
 7. **M6 Accounts and sync** — magic link, batch sync, delete account.
 8. **M7 Polish and launch** — accessibility audit, performance pass, private beta with ~20 people, public launch.
@@ -543,7 +543,7 @@ Measurement uses cookieless, aggregate analytics only. No individual tracking.
 | # | Risk | Likelihood / Impact | Mitigation |
 |---|---|---|---|
 | 1 | ESV rate limits (5,000/day) are exhausted by modest traffic | High / High | ESV is not default; short-TTL cache; no prefetch; per-visitor throttle; fall back to BSB with calm message; request a higher limit from Crossway if traffic grows |
-| 2 | Terms ambiguity ("half a book", caching, SEO use) | Medium / High | Read live terms; email Crossway for written confirmation before launch; choose stricter interpretation by default |
+| 2 | Terms ambiguity ("half a book", caching, SEO use) | Medium / High | Read live terms; email Crossway for written confirmation before ESV is made publicly available; choose stricter interpretation by default |
 | 3 | Pressure to monetize conflicts with ESV non-commercial rule | Medium / High | Written policy: no monetization while ESV is offered; compliance checklist; if needed, drop ESV |
 | 4 | Parser mis-resolves references, which breaks trust in the main feature | Medium / High | Large test table; log (privacy-safe, aggregate) failed-parse strings locally in dev only; ambiguity UI |
 | 5 | Verse numbering differences across translations break highlights | Medium / Medium | Canonical versification and mapping table; tests across 4 translations; fall back to the nearest verse |
@@ -591,12 +591,12 @@ Decisions needed from you. Each has my default assumption.
 | 9 | **Fonts.** Serif choice, and whether to offer a sans alternative at launch. | Source Serif 4 + Inter option |
 | 10 | **Landing for first-time visitors.** John 1? Genesis 1? A blank bar with focus? | John 1 (BSB) |
 | 11 | **Sync scope.** Highlights only, or also settings, last position, translation? | Highlights only |
-| 12 | **ESV in MVP or after?** Compliance work is real; ship ESV at launch or in a fast follow? | At launch, but can slip without blocking |
-| 13 | **Written confirmation from Crossway** on caching, half-book rule, SEO/indexing: will you email them? | Yes, before launch |
+| 12 | **ESV in MVP or after?** Compliance work is real; ship ESV at launch or in a fast follow? | At launch if its licensing, compliance, testing and attribution requirements are met. Otherwise launch with BSB, KJV and WEB, and ESV follows once they are met. ESV is not publicly accessible through the UI or API until then. |
+| 13 | **Written confirmation from Crossway** on caching, half-book rule, SEO/indexing: will you email them? | Yes, before ESV is made publicly available |
 | 14 | **Analytics.** Any at all? Cookieless aggregate OK? | Cookieless aggregate |
 | 15 | **Apocrypha / deuterocanon.** Excluded? | Excluded (Protestant 66 books) |
 | 16 | **Footnotes and section headings** shown by default? | Headings on, footnotes on hover |
-| 17 | **Open source?** Will the code be public? (Affects the ESV key hygiene and trust.) | Private at first |
+| 17 | **Open source?** Will the code be public? (Affects the ESV key hygiene and trust.) | The GitHub repository is already public. The license is undecided: no license file exists, so no reuse rights are granted yet. The ESV key stays a Worker secret. |
 | 18 | **Budget and time for private beta** (~20 people) before public launch? | Yes, 2 weeks |
 | 19 | **Support / contact** for error reports. | Single email on About page |
 | 20 | **Accessibility commitment** beyond AA (e.g., AAA contrast on body text)? | AA, aim higher for body text |
